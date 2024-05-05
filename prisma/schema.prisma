@@ -21,9 +21,10 @@ model User {
   image           String?
   refreshToken    String?
   isVerifiedEmail DateTime?
-  createdAt       DateTime?   @default(now())
-  updatedAt       DateTime    @updatedAt
+  created_at      DateTime?   @default(now())
+  updated_at      DateTime?   @default(now()) @updatedAt
   ChatUsers       ChatUsers[]
+  message         Message[]
 }
 
 model File {
@@ -33,27 +34,31 @@ model File {
   type String
   url  String
 
-  createdAt DateTime? @default(now())
-  updatedAt DateTime? @default(now()) @updatedAt
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now()) @updatedAt
 }
 
 model Chat {
   id         String      @id @default(cuid())
   title      String?
   is_group   Boolean?    @default(false)
+  image      String?
   created_at DateTime?   @default(now())
-  users      ChatUsers[]
+  updated_at DateTime?   @default(now()) @updatedAt
+  messages   Message[]
+  chat_users ChatUsers[]
 
   @@map("chats")
 }
 
 model ChatUsers {
-  user_id  String
-  user     User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  chat_id  String
-  chat     Chat      @relation(fields: [chat_id], references: [id], onDelete: Cascade)
-  is_admin Boolean?  @default(false)
-  messages Message[]
+  user_id    String
+  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  chat_id    String
+  chat       Chat      @relation(fields: [chat_id], references: [id], onDelete: Cascade)
+  is_admin   Boolean?  @default(false)
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now()) @updatedAt
 
   @@id([user_id, chat_id])
   @@map("chat_users")
@@ -61,12 +66,14 @@ model ChatUsers {
 
 model Message {
   id         String    @id @default(cuid())
-  author_id  String
+  user_id    String
+  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
   chat_id    String
-  chat_user  ChatUsers @relation(fields: [chat_id, author_id], references: [chat_id, user_id], onDelete: Cascade)
+  chat       Chat      @relation(fields: [chat_id], references: [id], onDelete: Cascade)
   is_deleted Boolean?  @default(false)
+  message    String
   created_at DateTime? @default(now())
-  content    String
+  updated_at DateTime? @default(now()) @updatedAt
 
   @@map("messages")
 }

@@ -10,10 +10,10 @@ export class UserEntity implements User {
   id: string;
 
   @ApiProperty()
-  createdAt: Date;
+  created_at: Date;
 
   @ApiProperty()
-  updatedAt: Date;
+  updated_at: Date;
 
   @ApiProperty()
   name: string;
