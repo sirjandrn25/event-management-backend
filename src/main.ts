@@ -14,6 +14,7 @@ async function bootstrap() {
     .setTitle('chat')
     .setDescription('The chat API description')
     .setVersion('0.1')
+    .addBearerAuth()
     .build();
 
   app.enableCors();
