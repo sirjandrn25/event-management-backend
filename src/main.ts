@@ -4,6 +4,13 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { PrismaClientExceptionFilter } from './prisma-client-exception/prisma-client-exception.filter';
 import { ClassSerializerInterceptor } from '@nestjs/common';
 
+import { config as AWSConfig } from 'aws-sdk';
+
+AWSConfig.update({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
+});
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
