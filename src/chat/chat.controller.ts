@@ -15,7 +15,7 @@ import { UpdateChatDto } from './dto/update-chat.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
-@Controller('chat')
+@Controller('chats')
 @ApiTags('Chat')
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
