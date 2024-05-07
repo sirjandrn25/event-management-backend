@@ -1,19 +1,19 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  UseGuards,
+  Get,
+  Param,
+  Patch,
+  Post,
   Request,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ChatService } from './chat.service';
 import { CreateChatWithUserDto } from './dto/create-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
-import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @Controller('chats')
 @ApiTags('Chat')
@@ -30,7 +30,7 @@ export class ChatController {
     const authorId = request.user.id;
     const chat = await this.chatService.create({
       title: createChatDto?.title,
-      is_group: createChatDto?.is_group,
+      is_group: createChatDto?.is_group ?? false,
     });
     const users = await this.chatService.addUserToChat(chat.id, [
       authorId,

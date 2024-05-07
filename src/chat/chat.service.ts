@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class ChatService {
@@ -25,6 +25,13 @@ export class ChatService {
           },
         },
       },
+      include: {
+        chat_users: {
+          include: {
+            user: true,
+          },
+        },
+      },
     });
   }
 
@@ -34,7 +41,11 @@ export class ChatService {
         id,
       },
       include: {
-        chat_users: true,
+        chat_users: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
   }
