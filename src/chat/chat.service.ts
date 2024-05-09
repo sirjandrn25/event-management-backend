@@ -107,11 +107,14 @@ export class ChatService {
         },
       },
     });
-    const chats = chatUsers.map((chatUser) => chatUser.chat);
-    return chats.find((el) =>
-      el?.chat_users.every((el: any) =>
+    const chats = chatUsers
+      .map((chatUser) => chatUser.chat)
+      .filter((chat) => chat?.chat_users?.length > 1);
+    return chats.find((el) => {
+      console.log('el?.chat_users', el?.chat_users);
+      return el?.chat_users.every((el: any) =>
         [ownerId, userId].includes(el?.user_id),
-      ),
-    );
+      );
+    });
   }
 }
