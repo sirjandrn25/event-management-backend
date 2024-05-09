@@ -28,6 +28,11 @@ export class ChatController {
     @Request() request,
   ) {
     const authorId = request.user.id;
+    const existedChat = this.chatService.existedChat(
+      request.user.id,
+      createChatDto.user_ids[0],
+    );
+    if (existedChat) return existedChat;
     const chat = await this.chatService.create({
       title: createChatDto?.title,
       is_group: createChatDto?.is_group ?? false,
@@ -50,6 +55,11 @@ export class ChatController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.chatService.findOne(id);
+  }
+
+  @Get(':id/messages')
+  messages(@Param('id') id: string) {
+    return this.chatService.messages(id);
   }
 
   @Patch(':id')

@@ -1,13 +1,16 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
   NotFoundException,
   Param,
+  Post,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { UserEntity } from './entities/user.entity';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { SearchDto } from './dto/search-dto';
+import { UserEntity } from './entities/user.entity';
+import { UsersService } from './users.service';
 
 @Controller('users')
 @ApiTags('Users')
@@ -21,6 +24,12 @@ export class UsersController {
     return users.map((user) => new UserEntity(user));
   }
 
+  @Post('/search')
+  @ApiCreatedResponse({ type: UserEntity, isArray: true })
+  async search(@Body() body: SearchDto) {
+    const users = await this.usersService.search(body.search);
+    return users.map((user) => new UserEntity(user));
+  }
   @Get(':id')
   @ApiCreatedResponse({ type: UserEntity })
   async findOne(@Param('id') id: string) {

@@ -80,4 +80,38 @@ export class ChatService {
       },
     });
   }
+
+  messages(id: string) {
+    return this.prisma.message.findMany({
+      where: {
+        chat_id: id,
+      },
+      include: {
+        user: true,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+  }
+  async existedChat(ownerId: string, userId: string) {
+    const chatUsers = await this.prisma.chatUsers.findMany({
+      where: {
+        user_id: ownerId,
+      },
+      include: {
+        chat: {
+          include: {
+            chat_users: true,
+          },
+        },
+      },
+    });
+    const chats = chatUsers.map((chatUser) => chatUser.chat);
+    return chats.find((el) =>
+      el?.chat_users.every((el: any) =>
+        [ownerId, userId].includes(el?.user_id),
+      ),
+    );
+  }
 }

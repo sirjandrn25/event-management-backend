@@ -9,7 +9,7 @@ import {
 
 export class CreateChatDto {
   @IsEmail()
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty({ required: false, default: 'chat-one' })
   title: string;
 

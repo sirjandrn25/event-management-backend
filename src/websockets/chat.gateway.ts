@@ -32,15 +32,18 @@ export class ChatGateway implements OnModuleInit {
   @SubscribeMessage('message')
   @UsePipes(new ValidationPipe())
   async onMessage(@MessageBody() body: ChatMessageDto): Promise<void> {
-    this.server.emit(body.chat_id, {
-      data: {
-        ...body,
-      },
-    });
     try {
-      await this.prisma.message.create({
+      const chatMessage = await this.prisma.message.create({
         data: {
           ...body,
+        },
+        include: {
+          user: true,
+        },
+      });
+      this.server.emit(body.chat_id, {
+        data: {
+          ...chatMessage,
         },
       });
     } catch (error) {

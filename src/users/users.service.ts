@@ -10,6 +10,17 @@ export class UsersService {
     return this.service.user.findMany();
   }
 
+  search(search: string) {
+    return this.service.user.findMany({
+      where: {
+        name: {
+          contains: search,
+          mode: 'insensitive',
+        },
+      },
+    });
+  }
+
   findOne(id: string) {
     return this.service.user.findUnique({
       where: {
