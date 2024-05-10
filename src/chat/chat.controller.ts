@@ -28,12 +28,15 @@ export class ChatController {
     @Request() request,
   ) {
     const authorId = request.user.id;
-    const existedChat = await this.chatService.existedChat(
-      request.user.id,
-      createChatDto.user_ids[0],
-    );
-    console.log('existedChat', existedChat);
-    if (existedChat) return existedChat;
+    if (!createChatDto?.is_group) {
+      const existedChat = await this.chatService.existedChat(
+        request.user.id,
+        createChatDto.user_ids[0],
+      );
+
+      if (existedChat) return existedChat;
+    }
+
     const chat = await this.chatService.create({
       title: createChatDto?.title,
       is_group: createChatDto?.is_group ?? false,
