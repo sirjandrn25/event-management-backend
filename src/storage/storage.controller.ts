@@ -18,7 +18,7 @@ export class StorageController {
     // generate unique name
     const time = Date.now();
     const key = `${time}-${uuidv4()}-${file.originalname}`;
-    const inputKey = `input/${key}`;
+    const inputKey = `chat/${key}`;
     const params = {
       Bucket: process.env.AWS_S3_BUCKET,
       Key: inputKey,

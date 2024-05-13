@@ -1,18 +1,19 @@
 import {
-  Controller,
   Body,
-  Post,
+  Controller,
   HttpCode,
   HttpStatus,
-  UseGuards,
+  Post,
   Request,
+  UseGuards,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { EmailRegisterDto } from './dto/email-register.dto';
-import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
-import { EmailLoginDto } from './dto/email-login.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { UserEntity } from 'src/users/entities/user.entity';
+import { AuthService } from './auth.service';
+import { EmailLoginDto } from './dto/email-login.dto';
+import { EmailRegisterDto } from './dto/email-register.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AuthEntity } from './entities/auth.entity';
 
 @Controller('auth')
@@ -48,6 +49,17 @@ export class AuthController {
     return new UserEntity(await this.authService.me(request.user.id));
   }
 
+  @Post('update-profile')
+  @ApiCreatedResponse({ type: UserEntity })
+  @UseGuards(AuthGuard('jwt'))
+  public async updateProfile(
+    @Request() request,
+    @Body() data: UpdateProfileDto,
+  ) {
+    return new UserEntity(
+      await this.authService.updateProfile(request.user.id, data),
+    );
+  }
   @ApiBearerAuth()
   @Post('refresh')
   @UseGuards(AuthGuard('jwt-refresh'))

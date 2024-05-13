@@ -5,9 +5,9 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { EmailLoginDto } from './dto/email-login.dto';
-import * as bcrypt from 'bcrypt';
 import { EmailRegisterDto } from './dto/email-register.dto';
 
 export const roundsOfHashing = 10;
@@ -113,6 +113,17 @@ export class AuthService {
   }
   async me(userId: string) {
     return await this.service.user.findUnique({ where: { id: userId } });
+  }
+
+  async updateProfile(userId: string, data: any) {
+    return await this.service.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        ...data,
+      },
+    });
   }
 
   async logout(userId: string) {
