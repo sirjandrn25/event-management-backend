@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from 'src/prisma/prisma.module';
-import { ChatGateway } from './chat.gateway';
+import { NotificationGateway } from './notification.gateway';
 
 @Module({
-  providers: [ChatGateway],
+  providers: [NotificationGateway],
   imports: [PrismaModule],
+  exports: [NotificationGateway],
 })
 export class WebSocketsModule {}

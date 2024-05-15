@@ -14,66 +14,40 @@ datasource db {
 }
 
 model User {
-  id              String      @id @default(cuid())
+  id              String    @id @default(cuid())
   name            String
-  email           String      @unique
+  email           String    @unique
   password        String?
   image           String?
   refreshToken    String?
   isVerifiedEmail DateTime?
-  created_at      DateTime?   @default(now())
-  updated_at      DateTime?   @default(now()) @updatedAt
-  ChatUsers       ChatUsers[]
-  message         Message[]
+  created_at      DateTime? @default(now())
+  updated_at      DateTime? @default(now()) @updatedAt
+
+  events Event[]
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  start_time  DateTime
+  end_time    DateTime
+
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id])
+
+  created_at   DateTime @default(now())
+  updated_at   DateTime @default(now()) @updatedAt
+  participates String[]
 }
 
 model File {
-  id   String @id @default(cuid())
-  name String
-  size Int
-  type String
-  url  String
-
-  created_at DateTime? @default(now())
-  updated_at DateTime? @default(now()) @updatedAt
-}
-
-model Chat {
-  id         String      @id @default(cuid())
-  title      String?
-  is_group   Boolean?    @default(false)
-  image      String?
-  created_at DateTime?   @default(now())
-  updated_at DateTime?   @default(now()) @updatedAt
-  messages   Message[]
-  chat_users ChatUsers[]
-
-  @@map("chats")
-}
-
-model ChatUsers {
-  user_id    String
-  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  chat_id    String
-  chat       Chat      @relation(fields: [chat_id], references: [id], onDelete: Cascade)
-  is_admin   Boolean?  @default(false)
-  created_at DateTime? @default(now())
-  updated_at DateTime? @default(now()) @updatedAt
-
-  @@id([user_id, chat_id])
-  @@map("chat_users")
-}
-
-model Message {
   id         String    @id @default(cuid())
-  user_id    String
-  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  chat_id    String
-  chat       Chat      @relation(fields: [chat_id], references: [id], onDelete: Cascade)
-  is_deleted Boolean?  @default(false)
-  message    String
+  name       String
+  size       Int
+  type       String
+  url        String
   created_at DateTime? @default(now())
   updated_at DateTime? @default(now()) @updatedAt
-
-  @@map("messages")
 }
