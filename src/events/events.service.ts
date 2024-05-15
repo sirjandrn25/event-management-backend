@@ -36,7 +36,11 @@ export class EventsService {
       where: {
         id,
       },
-      data: updateEventDto,
+      data: {
+        participates: updateEventDto?.participates,
+        title: updateEventDto?.title,
+        description: updateEventDto?.description,
+      },
     });
   }
 

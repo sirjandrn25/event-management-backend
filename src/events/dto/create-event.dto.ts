@@ -1,4 +1,11 @@
-import { IsDate, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsArray,
+  IsDate,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class CreateEventDto {
   @IsNotEmpty()
@@ -17,4 +24,8 @@ export class CreateEventDto {
   @IsNotEmpty()
   @IsDate()
   end_time: Date;
+
+  @IsOptional()
+  @IsArray()
+  participates?: string[];
 }

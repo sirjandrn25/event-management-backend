@@ -24,8 +24,7 @@ model User {
   created_at      DateTime? @default(now())
   updated_at      DateTime? @default(now()) @updatedAt
 
-  events      Event[]
-  event_users EventUser[]
+  events Event[]
 }
 
 model Event {
@@ -38,19 +37,9 @@ model Event {
   user_id String
   user    User   @relation(fields: [user_id], references: [id])
 
-  created_at     DateTime    @default(now())
-  updated_at     DateTime    @default(now()) @updatedAt
-  particitipates EventUser[]
-}
-
-model EventUser {
-  id         String   @id @default(cuid())
-  user_id    String
-  user       User     @relation(fields: [user_id], references: [id])
-  event_id   String
-  event      Event    @relation(fields: [event_id], references: [id])
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now()) @updatedAt
+  created_at   DateTime @default(now())
+  updated_at   DateTime @default(now()) @updatedAt
+  participates String[]
 }
 
 model File {
