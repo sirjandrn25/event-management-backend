@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
+import * as argon from 'argon2';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { EmailLoginDto } from './dto/email-login.dto';
 import { EmailRegisterDto } from './dto/email-register.dto';
@@ -29,9 +29,9 @@ export class AuthService {
       );
     }
 
-    const isValidPassword = await bcrypt.compare(
-      emailLoginDto.password,
+    const isValidPassword = await argon.verify(
       user.password,
+      emailLoginDto.password,
     );
     if (!isValidPassword) throw new UnauthorizedException('Invalid password');
     const tokens = await this.getTokens(user.id, user.email);
@@ -92,10 +92,7 @@ export class AuthService {
   }
 
   async register(emailRegisterDto: EmailRegisterDto) {
-    const hashedPassword = await bcrypt.hash(
-      emailRegisterDto.password,
-      roundsOfHashing,
-    );
+    const hashedPassword = await argon.hash(emailRegisterDto.password);
 
     emailRegisterDto.password = hashedPassword;
     const existedUser = await this.service.user.findUnique({

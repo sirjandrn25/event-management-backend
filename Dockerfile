@@ -10,6 +10,7 @@ COPY package*.json ./
 # Install app dependencies
 RUN npm install
 
+
 # Bundle app source
 COPY . .
 
@@ -19,23 +20,8 @@ COPY .env  ./
 # Creates a "dist" folder with the production build
 RUN npm run build
 
-# Install cron
-RUN apt-get update && apt-get install -y cron
-
-# Create a new cron file
-RUN touch /etc/cron.d/your-cron-jobs
-
-# Add your cron job to the cron file
-RUN echo "*/5 * * * * node /usr/src/app/your-cron-script.js" >> /etc/cron.d/your-cron-jobs
-
-# Give execution rights to the cron file
-RUN chmod 0644 /etc/cron.d/your-cron-jobs
-
-# Restart the cron daemon to apply the changes
-RUN service cron restart
-
 # Expose the port on which the app will run
 EXPOSE 8000
 
 # Start the server using the production build
-CMD ["cron", "-f", "/etc/cron.d/your-cron-jobs", "&&", "npm", "run", "start:prod"]
+CMD ["npm", "run", "start:prod"]
