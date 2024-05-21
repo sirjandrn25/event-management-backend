@@ -4,6 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { PrismaClientExceptionFilter } from './prisma-client-exception/prisma-client-exception.filter';
 
+import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { config as AWSConfig } from 'aws-sdk';
 
 AWSConfig.update({
@@ -23,8 +24,18 @@ async function bootstrap() {
     .setVersion('0.1')
     .addBearerAuth()
     .build();
-
-  app.enableCors();
+  const corsOptions: CorsOptions = {
+    origin:
+      process.env.NODE_ENV === 'production'
+        ? 'https://event-management-frontend-pi.vercel.app'
+        : 'http://localhost:3000',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    credentials: true,
+  };
+  // Enable CORS with the specified options
+  app.enableCors(corsOptions);
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);

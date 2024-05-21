@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { addMinutes } from 'date-fns';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { NotificationGateway } from 'src/websockets/notification.gateway';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -37,7 +38,7 @@ export class EventsService {
     });
   }
 
-  update(id: string, updateEventDto: UpdateEventDto) {
+  async update(id: string, updateEventDto: UpdateEventDto) {
     return this.db.event.update({
       where: {
         id,
@@ -46,6 +47,8 @@ export class EventsService {
         participates: updateEventDto?.participates,
         title: updateEventDto?.title,
         description: updateEventDto?.description,
+        start_time: updateEventDto?.start_time,
+        end_time: updateEventDto?.end_time,
       },
     });
   }
@@ -61,10 +64,13 @@ export class EventsService {
   @Cron(CronExpression.EVERY_30_SECONDS)
   async handleCron() {
     const currentTime = new Date();
-    console.log('currentTime', currentTime);
+
     const events = await this.db.event.findMany({
       where: {
-        start_time: currentTime,
+        start_time: {
+          gte: currentTime,
+          lte: addMinutes(currentTime, 1),
+        },
       },
     });
     console.log('events', events);
