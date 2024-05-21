@@ -53,6 +53,31 @@ export class EventsService {
     });
   }
 
+  async checkEventAlreadyExist(id: string, updateEventDto: UpdateEventDto) {
+    const event = await this.db.event.findUnique({
+      where: {
+        id,
+      },
+    });
+    const startTime = new Date(updateEventDto?.start_time);
+    const endTime = new Date(updateEventDto?.end_time);
+    const existEvents = await this.db.event.findMany({
+      where: {
+        user_id: event.user_id,
+
+        start_time: {
+          gte: startTime,
+          lte: addMinutes(startTime, 1),
+        },
+        end_time: {
+          gte: new Date(endTime),
+          lte: addMinutes(endTime, 1),
+        },
+      },
+    });
+    return existEvents?.length > 0;
+  }
+
   remove(id: string) {
     return this.db.event.delete({
       where: {

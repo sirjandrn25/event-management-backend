@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpException,
+  HttpStatus,
   Param,
   Post,
   Put,
@@ -40,8 +42,39 @@ export class EventsController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
-    return this.eventsService.update(id, updateEventDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateEventDto: UpdateEventDto,
+  ) {
+    try {
+      const isAlreadyExists = await this.eventsService.checkEventAlreadyExist(
+        id,
+        updateEventDto,
+      );
+      if (isAlreadyExists)
+        throw new HttpException(
+          {
+            status: HttpStatus.FORBIDDEN,
+            error: 'Duplicate event',
+          },
+          HttpStatus.FORBIDDEN,
+          {
+            cause: 'Duplicate event',
+          },
+        );
+      return this.eventsService.update(id, updateEventDto);
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.FORBIDDEN,
+          error: 'This is a custom message',
+        },
+        HttpStatus.FORBIDDEN,
+        {
+          cause: error,
+        },
+      );
+    }
   }
 
   @Delete(':id')
