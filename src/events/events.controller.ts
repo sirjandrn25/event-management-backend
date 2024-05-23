@@ -47,21 +47,21 @@ export class EventsController {
     @Body() updateEventDto: UpdateEventDto,
   ) {
     try {
-      const isAlreadyExists = await this.eventsService.checkEventAlreadyExist(
-        id,
-        updateEventDto,
-      );
-      if (isAlreadyExists)
-        throw new HttpException(
-          {
-            status: HttpStatus.FORBIDDEN,
-            error: 'Duplicate event',
-          },
-          HttpStatus.FORBIDDEN,
-          {
-            cause: 'Duplicate event',
-          },
-        );
+      // const isAlreadyExists = await this.eventsService.checkEventAlreadyExist(
+      //   id,
+      //   updateEventDto,
+      // );
+      // if (isAlreadyExists)
+      //   throw new HttpException(
+      //     {
+      //       status: HttpStatus.FORBIDDEN,
+      //       error: 'Duplicate event',
+      //     },
+      //     HttpStatus.FORBIDDEN,
+      //     {
+      //       cause: 'Duplicate event',
+      //     },
+      //   );
       return this.eventsService.update(id, updateEventDto);
     } catch (error) {
       throw new HttpException(

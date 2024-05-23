@@ -1,3 +1,4 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import {
   HttpException,
   Injectable,
@@ -7,15 +8,19 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { EmailLoginDto } from './dto/email-login.dto';
-import { EmailRegisterDto } from './dto/email-register.dto';
+import {
+  EmailDto,
+  EmailLoginDto,
+  EmailRegisterDto,
+  ForgotPasswordDto,
+} from './dto/email-register.dto';
 
-export const roundsOfHashing = 10;
 @Injectable()
 export class AuthService {
   constructor(
     private service: PrismaService,
     private jwtService: JwtService,
+    private readonly mailService: MailerService,
   ) {}
   async login(emailLoginDto: EmailLoginDto) {
     const user = await this.service.user.findUnique({
@@ -91,8 +96,30 @@ export class AuthService {
     );
   }
 
+  sendMail({
+    email,
+    subject,
+    message,
+  }: {
+    email: string;
+    subject: string;
+    message: string;
+  }) {
+    this.mailService.sendMail({
+      from: `${process.env.SENDER_NAME} <${process.env.SENDER_EMAIL}>`,
+      to: email,
+      subject: subject,
+      text: message,
+    });
+  }
+
+  async makeHashPassword(password: string) {
+    return await argon.hash(password);
+  }
   async register(emailRegisterDto: EmailRegisterDto) {
-    const hashedPassword = await argon.hash(emailRegisterDto.password);
+    const hashedPassword = await this.makeHashPassword(
+      emailRegisterDto.password,
+    );
 
     emailRegisterDto.password = hashedPassword;
     const existedUser = await this.service.user.findUnique({
@@ -101,15 +128,76 @@ export class AuthService {
       },
     });
     if (existedUser) throw new HttpException('Email Already Registered', 400);
+    const verifyCode = this.generateToken();
     const user = await this.service.user.create({
       data: {
         ...emailRegisterDto,
+        code: verifyCode,
       },
+    });
+    this.sendMail({
+      email: user?.email,
+      subject: 'Verify Email',
+      message: `Your verification code is ${verifyCode}`,
     });
     return user;
   }
+
+  async forgotPassword(data: EmailDto) {
+    const verifyCode = this.generateToken();
+
+    await this.service.user.update({
+      where: {
+        email: data.email,
+      },
+      data: {
+        code: verifyCode,
+      },
+    });
+    this.sendMail({
+      email: data.email,
+      subject: 'Forgot Password',
+      message: `Your forgot password verification code is ${verifyCode}`,
+    });
+  }
+
+  async forgotPasswordVerify(data: ForgotPasswordDto) {
+    const hashedPassword = await this.makeHashPassword(data.password);
+    return await this.service.user.update({
+      where: {
+        email: data.email,
+      },
+      data: {
+        password: hashedPassword,
+        code: null,
+      },
+    });
+  }
+
+  async isVerifyCode(email: string, code: string) {
+    const user = await this.service.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    return user?.code === code;
+  }
+
   async me(userId: string) {
     return await this.service.user.findUnique({ where: { id: userId } });
+  }
+
+  async verifyEmail(email: string) {
+    return await this.service.user.update({
+      where: {
+        email,
+      },
+      data: {
+        isVerifiedEmail: new Date(),
+        code: null,
+      },
+    });
   }
 
   async updateProfile(userId: string, data: any) {
@@ -133,4 +221,25 @@ export class AuthService {
       },
     });
   }
+
+  async resendToken(email: string) {
+    const verifyToken = this.generateToken();
+    await this.service.user.update({
+      where: {
+        email,
+      },
+      data: {
+        code: verifyToken,
+      },
+    });
+    this.sendMail({
+      email,
+      subject: 'Resend Token',
+      message: `Your verification code is ${verifyToken}`,
+    });
+  }
+  generateToken = () => {
+    const fourDigit = Math.floor(1000 + Math.random() * 9000);
+    return fourDigit.toString();
+  };
 }

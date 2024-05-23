@@ -25,6 +25,7 @@ model User {
   isVerifiedEmail DateTime?
   created_at      DateTime? @default(now())
   updated_at      DateTime? @default(now()) @updatedAt
+  code            String?
 
   events Event[]
 }
