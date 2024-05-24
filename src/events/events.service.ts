@@ -1,3 +1,4 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { addMinutes } from 'date-fns';
@@ -12,6 +13,7 @@ export class EventsService {
   constructor(
     private db: PrismaService,
     private notificationGateway: NotificationGateway,
+    private readonly mailService: MailerService,
   ) {}
   create(createEventDto: CreateEventDto, user_id: string) {
     return this.db.event.create({
@@ -86,6 +88,23 @@ export class EventsService {
     });
   }
 
+  sendMail({
+    email,
+    subject,
+    message,
+  }: {
+    email: string;
+    subject: string;
+    message: string;
+  }) {
+    this.mailService.sendMail({
+      from: `${process.env.SENDER_NAME} <${process.env.SENDER_EMAIL}>`,
+      to: email,
+      subject: subject,
+      text: message,
+    });
+  }
+
   @Cron(CronExpression.EVERY_30_SECONDS)
   async handleCron() {
     const currentTime = new Date();
@@ -97,12 +116,33 @@ export class EventsService {
           lte: addMinutes(currentTime, 1),
         },
       },
+      include: {
+        user: {
+          select: {
+            email: true,
+          },
+        },
+      },
     });
-    console.log('events', events);
 
     events.forEach((event) => {
       // Send notification for each event
       this.notificationGateway.sendScheduleNotification(event);
+      const subject = 'Calendar Event';
+      const message = `${event.title} is start`;
+
+      this.sendMail({
+        email: event?.user?.email,
+        subject,
+        message,
+      });
+      event?.participates?.forEach((email) => {
+        this.sendMail({
+          email,
+          subject,
+          message,
+        });
+      });
     });
   }
 
