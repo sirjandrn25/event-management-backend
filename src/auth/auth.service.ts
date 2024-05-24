@@ -146,7 +146,7 @@ export class AuthService {
   async forgotPassword(data: EmailDto) {
     const verifyCode = this.generateToken();
 
-    await this.service.user.update({
+    const user = await this.service.user.update({
       where: {
         email: data.email,
       },
@@ -159,6 +159,7 @@ export class AuthService {
       subject: 'Forgot Password',
       message: `Your forgot password verification code is ${verifyCode}`,
     });
+    return user;
   }
 
   async forgotPasswordVerify(data: ForgotPasswordDto) {

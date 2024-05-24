@@ -67,8 +67,9 @@ export class AuthController {
     return new UserEntity(await this.authService.verifyEmail(data.email));
   }
   @Post('forgot-password')
+  @ApiCreatedResponse({ type: UserEntity })
   public async forgotPassword(@Body() data: EmailDto) {
-    return this.authService.forgotPassword(data);
+    return new UserEntity(await this.authService.forgotPassword(data));
   }
 
   @ApiCreatedResponse({ type: UserEntity })
