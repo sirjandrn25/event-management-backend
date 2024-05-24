@@ -75,7 +75,7 @@ export class EventsService {
         },
       },
     });
-    return existEvents?.length > 0;
+    return existEvents?.length > 1;
   }
 
   remove(id: string) {
